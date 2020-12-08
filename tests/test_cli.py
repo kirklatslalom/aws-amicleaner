@@ -164,8 +164,8 @@ def test_parse_args_no_args():
     assert parser.full_report is False
     assert parser.mapping_key is None
     assert parser.mapping_values is None
-    assert parser.keep_previous is 4
-    assert parser.ami_min_days is -1
+    assert parser.keep_previous == 4
+    assert parser.ami_min_days == -1
 
 
 def test_parse_args():
