@@ -1,0 +1,57 @@
+repos:
+-   repo: https://github.com/ambv/black
+    rev: stable
+    hooks:
+    - id: black
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v1.2.3
+    hooks:
+    -   id: check-merge-conflict
+    -   id: check-yaml
+    -   id: check-json
+    -   id: debug-statements
+    -   id: flake8
+        args: [--max-line-length=120]
+    -   id: trailing-whitespace
+    -   id: requirements-txt-fixer
+    -   id: name-tests-test
+    -   id: fix-encoding-pragma
+    -   id: end-of-file-fixer
+    -   id: detect-private-key
+    -   id: check-executables-have-shebangs
+-   repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
+    rev: v1.0.3
+    hooks:
+    -   id: python-bandit-vulnerability-check
+        args: [-l, --recursive, -x, tests]
+        files: .py$
+-   repo: git://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.35.0 # Get the latest from: https://github.com/antonbabenko/pre-commit-terraform/releases
+    hooks:
+    - id: terraform_fmt
+    - id: terraform_docs
+    - id: terraform_validate
+    - id: terraform_tflint
+#    - id: terraform_tfsec
+-   repo: https://github.com/jazzband/pip-tools
+    rev: 5.0.0
+    hooks:
+      - id: pip-compile
+-   repo: https://github.com/aws-cloudformation/cfn-python-lint
+    rev: v0.35.0  # The version of cfn-lint to use
+    hooks:
+    -   id: cfn-python-lint
+        files: path/to/cfn/dir/.*\.(json|yml|yaml)$
+-   repo: https://github.com/bridgecrewio/checkov.git
+    rev: 1.0.505
+    hooks:
+    - id: checkov
+      files: \.tf$
+-   repo: local
+    hooks:
+    -   id: tests
+        name: run tests
+        entry: pytest -v
+        language: system
+        types: [python]
+        stages: [push]
