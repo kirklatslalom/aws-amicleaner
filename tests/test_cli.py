@@ -15,7 +15,7 @@ from amicleaner.resources.models import AMI, AWSEC2Instance
 @mock_ec2
 @mock_autoscaling
 def test_fetch_and_prepare():
-    parser = parse_args(['--keep-previous', '0'])
+    parser = parse_args(["--keep-previous", "0"])
     assert App(parser).prepare_candidates() is None
 
 
@@ -28,35 +28,32 @@ def test_deletion():
 
     parser = parse_args(
         [
-            '--keep-previous', '0',
-            '--mapping-key', 'name',
-            '--mapping-values', 'test-ami']
+            "--keep-previous",
+            "0",
+            "--mapping-key",
+            "name",
+            "--mapping-values",
+            "test-ami",
+        ]
     )
 
-    ec2 = boto3.client('ec2')
-    reservation = ec2.run_instances(
-        ImageId=base_ami, MinCount=1, MaxCount=1
-    )
+    ec2 = boto3.client("ec2")
+    reservation = ec2.run_instances(ImageId=base_ami, MinCount=1, MaxCount=1)
     instance = reservation["Instances"][0]
 
     # create amis
     images = []
     for i in range(5):
-        image = ec2.create_image(
-            InstanceId=instance.get("InstanceId"),
-            Name="test-ami"
-        )
+        image = ec2.create_image(InstanceId=instance.get("InstanceId"), Name="test-ami")
         images.append(image.get("ImageId"))
 
     # delete one AMI by id
     app = App(parser)
-    asg = boto3.client('autoscaling')
+    asg = boto3.client("autoscaling")
     f = Fetcher(ec2=ec2, autoscaling=asg)
 
     assert len(f.fetch_available_amis()) == 5
-    assert app.prepare_delete_amis(
-        candidates=[images[4]], from_ids=True
-    ) is None
+    assert app.prepare_delete_amis(candidates=[images[4]], from_ids=True) is None
     assert len(f.fetch_available_amis()) == 4
 
     # delete with mapping strategy
@@ -74,12 +71,12 @@ def test_deletion_ami_min_days():
     # creating tests objects
     first_ami = AMI()
     first_ami.name = "test-ami"
-    first_ami.id = 'ami-28c2b348'
+    first_ami.id = "ami-28c2b348"
     first_ami.creation_date = "2017-11-04T01:35:31.000Z"
 
     second_ami = AMI()
     second_ami.name = "test-ami"
-    second_ami.id = 'ami-28c2b349'
+    second_ami.id = "ami-28c2b349"
     second_ami.creation_date = "2017-11-04T01:35:31.000Z"
 
     # constructing dicts
@@ -89,10 +86,15 @@ def test_deletion_ami_min_days():
 
     parser = parse_args(
         [
-            '--keep-previous', '0',
-            '--ami-min-days', '1',
-            '--mapping-key', 'name',
-            '--mapping-values', 'test-ami']
+            "--keep-previous",
+            "0",
+            "--ami-min-days",
+            "1",
+            "--mapping-key",
+            "name",
+            "--mapping-values",
+            "test-ami",
+        ]
     )
 
     app = App(parser)
@@ -105,10 +107,15 @@ def test_deletion_ami_min_days():
 
     parser = parse_args(
         [
-            '--keep-previous', '0',
-            '--ami-min-days', '10000',
-            '--mapping-key', 'name',
-            '--mapping-values', 'test-ami']
+            "--keep-previous",
+            "0",
+            "--ami-min-days",
+            "10000",
+            "--mapping-key",
+            "name",
+            "--mapping-values",
+            "test-ami",
+        ]
     )
 
     app = App(parser)
@@ -120,21 +127,21 @@ def test_deletion_ami_min_days():
 def test_fetch_candidates():
     # creating tests objects
     first_ami = AMI()
-    first_ami.id = 'ami-28c2b348'
+    first_ami.id = "ami-28c2b348"
     first_ami.creation_date = datetime.now()
 
     first_instance = AWSEC2Instance()
-    first_instance.id = 'i-9f9f6a2a'
+    first_instance.id = "i-9f9f6a2a"
     first_instance.name = "first-instance"
     first_instance.image_id = first_ami.id
     first_instance.launch_time = datetime.now()
 
     second_ami = AMI()
-    second_ami.id = 'unused-ami'
+    second_ami.id = "unused-ami"
     second_ami.creation_date = datetime.now()
 
     second_instance = AWSEC2Instance()
-    second_instance.id = 'i-9f9f6a2b'
+    second_instance.id = "i-9f9f6a2b"
     second_instance.name = "second-instance"
     second_instance.image_id = first_ami.id
     second_instance.launch_time = datetime.now()
@@ -153,7 +160,7 @@ def test_fetch_candidates():
         amis_dict, list(instances_dict)
     )
     assert len(unused_ami_dict) == 1
-    assert amis_dict.get('unused-ami') is not None
+    assert amis_dict.get("unused-ami") is not None
 
 
 def test_parse_args_no_args():
@@ -169,19 +176,20 @@ def test_parse_args_no_args():
 
 
 def test_parse_args():
-    parser = parse_args(['--keep-previous', '10', '--full-report'])
+    parser = parse_args(["--keep-previous", "10", "--full-report"])
     assert parser.keep_previous == 10
     assert parser.full_report is True
 
-    parser = parse_args(['--mapping-key', 'name'])
+    parser = parse_args(["--mapping-key", "name"])
     assert parser is None
 
-    parser = parse_args(['--mapping-key', 'tags',
-                         '--mapping-values', 'group1', 'group2'])
+    parser = parse_args(
+        ["--mapping-key", "tags", "--mapping-values", "group1", "group2"]
+    )
     assert parser.mapping_key == "tags"
     assert len(parser.mapping_values) == 2
 
-    parser = parse_args(['--ami-min-days', '10', '--full-report'])
+    parser = parse_args(["--ami-min-days", "10", "--full-report"])
     assert parser.ami_min_days == 10
     assert parser.full_report is True
 
@@ -192,7 +200,7 @@ def test_print_report():
     with open("tests/mocks/ami.json") as mock_file:
         json_to_parse = json.load(mock_file)
         ami = AMI.object_with_json(json_to_parse)
-        candidates = {'test': [ami]}
+        candidates = {"test": [ami]}
         assert Printer.print_report(candidates) is None
         assert Printer.print_report(candidates, full_report=True) is None
 

@@ -1,6 +1,6 @@
-awscli
 argparse
+awscli
+blessings==1.6
 boto
 boto3
 prettytable
-blessings==1.6

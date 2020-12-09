@@ -16,13 +16,14 @@ from .utils import Printer, parse_args
 
 
 class App(object):
-
     def __init__(self, args):
 
         self.version = args.version
         self.mapping_key = args.mapping_key or MAPPING_KEY
         self.mapping_values = args.mapping_values or MAPPING_VALUES
-        self.excluded_mapping_values = args.excluded_mapping_values or EXCLUDED_MAPPING_VALUES
+        self.excluded_mapping_values = (
+            args.excluded_mapping_values or EXCLUDED_MAPPING_VALUES
+        )
         self.keep_previous = args.keep_previous
         self.check_orphans = args.check_orphans
         self.from_ids = args.from_ids
@@ -53,10 +54,7 @@ class App(object):
             excluded_amis += f.fetch_zeroed_asg()
             excluded_amis += f.fetch_instances()
 
-        candidates = [v
-                      for k, v
-                      in available_amis.items()
-                      if k not in excluded_amis]
+        candidates = [v for k, v in available_amis.items() if k not in excluded_amis]
         return candidates
 
     def prepare_candidates(self, candidates_amis=None):
@@ -87,7 +85,9 @@ class App(object):
             if not group_name:
                 report["no-tags (excluded)"] = amis
             else:
-                reduced = c.reduce_candidates(amis, self.keep_previous, self.ami_min_days)
+                reduced = c.reduce_candidates(
+                    amis, self.keep_previous, self.ami_min_days
+                )
                 if reduced:
                     report[group_name] = reduced
                     candidates.extend(reduced)
@@ -103,9 +103,7 @@ class App(object):
         failed = []
 
         if from_ids:
-            print(TERM.bold("\nCleaning from {} AMI id(s) ...".format(
-                len(candidates))
-            ))
+            print(TERM.bold("\nCleaning from {} AMI id(s) ...".format(len(candidates))))
             failed = AMICleaner().remove_amis_from_ids(candidates)
         else:
             print(TERM.bold("\nCleaning {} AMIs ...".format(len(candidates))))
@@ -129,8 +127,9 @@ class App(object):
 
         answer = input(
             "Do you want to continue and remove {} orphan snapshots "
-            "[y/N] ? : ".format(len(snaps)))
-        confirm = (answer.lower() == "y")
+            "[y/N] ? : ".format(len(snaps))
+        )
+        confirm = answer.lower() == "y"
 
         if confirm:
             print("Removing orphan snapshots... ")
@@ -142,7 +141,11 @@ class App(object):
         print(TERM.bold("\nDefault values : ==>"))
         print(TERM.green("mapping_key : {0}".format(self.mapping_key)))
         print(TERM.green("mapping_values : {0}".format(self.mapping_values)))
-        print(TERM.green("excluded_mapping_values : {0}".format(self.excluded_mapping_values)))
+        print(
+            TERM.green(
+                "excluded_mapping_values : {0}".format(self.excluded_mapping_values)
+            )
+        )
         print(TERM.green("keep_previous : {0}".format(self.keep_previous)))
         print(TERM.green("ami_min_days : {0}".format(self.ami_min_days)))
 
@@ -172,8 +175,9 @@ class App(object):
             if not self.force_delete:
                 answer = input(
                     "Do you want to continue and remove {} AMIs "
-                    "[y/N] ? : ".format(len(candidates)))
-                delete = (answer.lower() == "y")
+                    "[y/N] ? : ".format(len(candidates))
+                )
+                delete = answer.lower() == "y"
             else:
                 delete = True
 

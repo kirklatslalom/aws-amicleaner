@@ -64,17 +64,17 @@ def test_tags_values_to_string_without_filters():
 def test_map_with_names():
     # creating tests objects
     first_ami = AMI()
-    first_ami.id = 'ami-28c2b348'
+    first_ami.id = "ami-28c2b348"
     first_ami.name = "ubuntu-20160102"
     first_ami.creation_date = datetime.now()
 
     second_ami = AMI()
-    second_ami.id = 'ami-28c2b349'
+    second_ami.id = "ami-28c2b349"
     second_ami.name = "ubuntu-20160103"
     second_ami.creation_date = datetime.now()
 
     third_ami = AMI()
-    third_ami.id = 'ami-28c2b350'
+    third_ami.id = "ami-28c2b350"
     third_ami.name = "debian-20160104"
     third_ami.creation_date = datetime.now()
 
@@ -86,8 +86,8 @@ def test_map_with_names():
 
     grouped_amis = AMICleaner().map_candidates(candidates, grouping_strategy)
     assert grouped_amis is not None
-    assert len(grouped_amis.get('ubuntu')) == 2
-    assert len(grouped_amis.get('debian')) == 1
+    assert len(grouped_amis.get("ubuntu")) == 2
+    assert len(grouped_amis.get("debian")) == 1
 
 
 def test_map_with_tags():
@@ -103,7 +103,7 @@ def test_map_with_tags():
     # creating tests objects
     # prod and web-server
     first_ami = AMI()
-    first_ami.id = 'ami-28c2b348'
+    first_ami.id = "ami-28c2b348"
     first_ami.name = "ubuntu-20160102"
     first_ami.tags.append(stack_tag)
     first_ami.tags.append(env_tag)
@@ -111,14 +111,14 @@ def test_map_with_tags():
 
     # just prod
     second_ami = AMI()
-    second_ami.id = 'ami-28c2b349'
+    second_ami.id = "ami-28c2b349"
     second_ami.name = "ubuntu-20160103"
     second_ami.tags.append(env_tag)
     second_ami.creation_date = datetime.now()
 
     # prod and web-server
     third_ami = AMI()
-    third_ami.id = 'ami-28c2b350'
+    third_ami.id = "ami-28c2b350"
     third_ami.name = "debian-20160104"
     third_ami.tags.append(stack_tag)
     third_ami.tags.append(env_tag)
@@ -148,7 +148,7 @@ def test_map_with_tag_exclusions():
     # creating tests objects
     # prod and web-server
     first_ami = AMI()
-    first_ami.id = 'ami-28c2b348'
+    first_ami.id = "ami-28c2b348"
     first_ami.name = "ubuntu-20160102"
     first_ami.tags.append(stack_tag)
     first_ami.tags.append(env_tag)
@@ -156,14 +156,14 @@ def test_map_with_tag_exclusions():
 
     # just prod
     second_ami = AMI()
-    second_ami.id = 'ami-28c2b349'
+    second_ami.id = "ami-28c2b349"
     second_ami.name = "ubuntu-20160103"
     second_ami.tags.append(env_tag)
     second_ami.creation_date = datetime.now()
 
     # just web-server
     third_ami = AMI()
-    third_ami.id = 'ami-28c2b350'
+    third_ami.id = "ami-28c2b350"
     third_ami.name = "debian-20160104"
     third_ami.tags.append(stack_tag)
     third_ami.creation_date = datetime.now()
@@ -172,7 +172,11 @@ def test_map_with_tag_exclusions():
     candidates = [first_ami, second_ami, third_ami]
 
     # grouping strategy
-    grouping_strategy = {"key": "tags", "values": ["stack", "env"], "excluded": ["prod"]}
+    grouping_strategy = {
+        "key": "tags",
+        "values": ["stack", "env"],
+        "excluded": ["prod"],
+    }
     grouped_amis = AMICleaner().map_candidates(candidates, grouping_strategy)
     assert grouped_amis is not None
     assert grouped_amis.get("prod") is None
@@ -183,19 +187,19 @@ def test_map_with_tag_exclusions():
 def test_reduce_without_rotation_number():
     # creating tests objects
     first_ami = AMI()
-    first_ami.id = 'ami-28c2b348'
+    first_ami.id = "ami-28c2b348"
     first_ami.name = "ubuntu-20160102"
     first_ami.creation_date = datetime(2016, 1, 10)
 
     # just prod
     second_ami = AMI()
-    second_ami.id = 'ami-28c2b349'
+    second_ami.id = "ami-28c2b349"
     second_ami.name = "ubuntu-20160103"
     second_ami.creation_date = datetime(2016, 1, 11)
 
     # prod and web-server
     third_ami = AMI()
-    third_ami.id = 'ami-28c2b350'
+    third_ami.id = "ami-28c2b350"
     third_ami.name = "debian-20160104"
     third_ami.creation_date = datetime(2016, 1, 12)
 
@@ -212,7 +216,7 @@ def test_reduce_without_snapshot_id():
 
     # creating tests objects
     first_ami = AMI()
-    first_ami.id = 'ami-28c2b348'
+    first_ami.id = "ami-28c2b348"
     first_ami.name = "ubuntu-20160102"
     first_ami.block_device_mappings.append(first_block_device)
 
@@ -225,19 +229,19 @@ def test_reduce_without_snapshot_id():
 def test_reduce():
     # creating tests objects
     first_ami = AMI()
-    first_ami.id = 'ami-28c2b348'
+    first_ami.id = "ami-28c2b348"
     first_ami.name = "ubuntu-20160102"
     first_ami.creation_date = datetime(2016, 1, 10)
 
     # just prod
     second_ami = AMI()
-    second_ami.id = 'ami-28c2b349'
+    second_ami.id = "ami-28c2b349"
     second_ami.name = "ubuntu-20160103"
     second_ami.creation_date = datetime(2016, 1, 11)
 
     # prod and web-server
     third_ami = AMI()
-    third_ami.id = 'ami-28c2b350'
+    third_ami.id = "ami-28c2b350"
     third_ami.name = "debian-20160104"
     third_ami.creation_date = datetime(2016, 1, 12)
 

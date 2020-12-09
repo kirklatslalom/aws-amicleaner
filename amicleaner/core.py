@@ -19,20 +19,21 @@ class OrphanSnapshotCleaner(object):
     """ Finds and removes ebs snapshots left orphaned """
 
     def __init__(self, ec2=None):
-        self.ec2 = ec2 or boto3.client('ec2', config=Config(retries={'max_attempts': BOTO3_RETRIES}))
+        self.ec2 = ec2 or boto3.client(
+            "ec2", config=Config(retries={"max_attempts": BOTO3_RETRIES})
+        )
 
     def get_snapshots_filter(self):
 
-        return [{
-            'Name': 'status',
-            'Values': [
-                'completed',
-            ]}, {
-            'Name': 'description',
-            'Values': [
-                'Created by CreateImage*'
-            ]
-        }]
+        return [
+            {
+                "Name": "status",
+                "Values": [
+                    "completed",
+                ],
+            },
+            {"Name": "description", "Values": ["Created by CreateImage*"]},
+        ]
 
     def get_owner_id(self, images_json):
 
@@ -49,7 +50,7 @@ class OrphanSnapshotCleaner(object):
 
         """ retrieve orphan snapshots """
 
-        resp = self.ec2.describe_images(Owners=['self'])
+        resp = self.ec2.describe_images(Owners=["self"])
 
         used_snaps = [
             ebs.get("Ebs", {}).get("SnapshotId")
@@ -63,9 +64,7 @@ class OrphanSnapshotCleaner(object):
             return []
 
         # all snapshots created for AMIs
-        resp = self.ec2.describe_snapshots(
-            Filters=snap_filter, OwnerIds=[owner_id]
-        )
+        resp = self.ec2.describe_snapshots(Filters=snap_filter, OwnerIds=[owner_id])
 
         all_snaps = [snap.get("SnapshotId") for snap in resp["Snapshots"]]
         return list(set(all_snaps) - set(used_snaps))
@@ -94,9 +93,10 @@ class OrphanSnapshotCleaner(object):
 
 
 class AMICleaner(object):
-
     def __init__(self, ec2=None):
-        self.ec2 = ec2 or boto3.client('ec2', config=Config(retries={'max_attempts': BOTO3_RETRIES}))
+        self.ec2 = ec2 or boto3.client(
+            "ec2", config=Config(retries={"max_attempts": BOTO3_RETRIES})
+        )
 
     @staticmethod
     def get_ami_sorting_key(ami):
@@ -121,9 +121,7 @@ class AMICleaner(object):
             for block_device in ami.block_device_mappings:
                 if block_device.snapshot_id is not None:
                     try:
-                            self.ec2.delete_snapshot(
-                                SnapshotId=block_device.snapshot_id
-                            )
+                        self.ec2.delete_snapshot(SnapshotId=block_device.snapshot_id)
                     except ClientError:
                         failed_snapshots.append(block_device.snapshot_id)
                     print("{0} deleted\n".format(block_device.snapshot_id))
@@ -140,12 +138,9 @@ class AMICleaner(object):
         if not ami_ids:
             return False
 
-        my_custom_images = self.ec2.describe_images(
-            Owners=['self'],
-            ImageIds=ami_ids
-        )
+        my_custom_images = self.ec2.describe_images(Owners=["self"], ImageIds=ami_ids)
         amis = []
-        for image_json in my_custom_images.get('Images'):
+        for image_json in my_custom_images.get("Images"):
             ami = AMI.object_with_json(image_json)
             amis.append(ami)
 
@@ -199,8 +194,7 @@ class AMICleaner(object):
             # case : grouping on tags
             elif mapping_strategy.get("key") == "tags":
                 mapping_value = self.tags_values_to_string(
-                    ami.tags,
-                    mapping_strategy.get("values")
+                    ami.tags, mapping_strategy.get("values")
                 )
                 if mapping_strategy.get("excluded"):
                     for excluded_mapping_value in mapping_strategy.get("excluded"):
@@ -238,7 +232,9 @@ class AMICleaner(object):
 
         return ".".join(sorted(tag_values))
 
-    def reduce_candidates(self, mapped_candidates_ami, keep_previous=0, ami_min_days=-1):
+    def reduce_candidates(
+        self, mapped_candidates_ami, keep_previous=0, ami_min_days=-1
+    ):
 
         """
         Given a array of AMIs to clean this function return a subsequent
@@ -251,7 +247,7 @@ class AMICleaner(object):
 
         if ami_min_days > 0:
             for ami in mapped_candidates_ami:
-                f_date = datetime.strptime(ami.creation_date, '%Y-%m-%dT%H:%M:%S.%fZ')
+                f_date = datetime.strptime(ami.creation_date, "%Y-%m-%dT%H:%M:%S.%fZ")
                 present = datetime.now()
                 delta = present - f_date
                 if delta.days < ami_min_days:
@@ -265,10 +261,6 @@ class AMICleaner(object):
         if not mapped_candidates_ami:
             return mapped_candidates_ami
 
-        amis = sorted(
-            mapped_candidates_ami,
-            key=self.get_ami_sorting_key,
-            reverse=True
-        )
+        amis = sorted(mapped_candidates_ami, key=self.get_ami_sorting_key, reverse=True)
 
         return amis[keep_previous:]

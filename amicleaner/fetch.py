@@ -17,8 +17,10 @@ class Fetcher(object):
 
         """ Initializes aws sdk clients """
 
-        self.ec2 = ec2 or boto3.client('ec2', config=Config(retries={'max_attempts': BOTO3_RETRIES}))
-        self.asg = autoscaling or boto3.client('autoscaling')
+        self.ec2 = ec2 or boto3.client(
+            "ec2", config=Config(retries={"max_attempts": BOTO3_RETRIES})
+        )
+        self.asg = autoscaling or boto3.client("autoscaling")
 
     def fetch_available_amis(self):
 
@@ -26,8 +28,8 @@ class Fetcher(object):
 
         available_amis = dict()
 
-        my_custom_images = self.ec2.describe_images(Owners=['self'])
-        for image_json in my_custom_images.get('Images'):
+        my_custom_images = self.ec2.describe_images(Owners=["self"])
+        for image_json in my_custom_images.get("Images"):
             ami = AMI.object_with_json(image_json)
             available_amis[ami.id] = ami
 
@@ -41,20 +43,23 @@ class Fetcher(object):
         """
 
         resp = self.asg.describe_auto_scaling_groups()
-        used_lc = (asg.get("LaunchConfigurationName", "")
-                   for asg in resp.get("AutoScalingGroups", []))
+        used_lc = (
+            asg.get("LaunchConfigurationName", "")
+            for asg in resp.get("AutoScalingGroups", [])
+        )
 
         resp = self.asg.describe_launch_configurations()
-        all_lcs = (lc.get("LaunchConfigurationName", "")
-                   for lc in resp.get("LaunchConfigurations", []))
+        all_lcs = (
+            lc.get("LaunchConfigurationName", "")
+            for lc in resp.get("LaunchConfigurations", [])
+        )
 
         unused_lcs = list(set(all_lcs) - set(used_lc))
 
         resp = self.asg.describe_launch_configurations(
             LaunchConfigurationNames=unused_lcs
         )
-        amis = [lc.get("ImageId")
-                for lc in resp.get("LaunchConfigurations", [])]
+        amis = [lc.get("ImageId") for lc in resp.get("LaunchConfigurations", [])]
 
         return amis
 
@@ -65,16 +70,17 @@ class Fetcher(object):
         """
 
         resp = self.asg.describe_auto_scaling_groups()
-        zeroed_lcs = [asg.get("LaunchConfigurationName", "")
-                      for asg in resp.get("AutoScalingGroups", [])
-                      if asg.get("DesiredCapacity", 0) == 0]
+        zeroed_lcs = [
+            asg.get("LaunchConfigurationName", "")
+            for asg in resp.get("AutoScalingGroups", [])
+            if asg.get("DesiredCapacity", 0) == 0
+        ]
 
         resp = self.asg.describe_launch_configurations(
             LaunchConfigurationNames=zeroed_lcs
         )
 
-        amis = [lc.get("ImageId", "")
-                for lc in resp.get("LaunchConfigurations", [])]
+        amis = [lc.get("ImageId", "") for lc in resp.get("LaunchConfigurations", [])]
 
         return amis
 
@@ -85,19 +91,21 @@ class Fetcher(object):
         resp = self.ec2.describe_instances(
             Filters=[
                 {
-                    'Name': 'instance-state-name',
-                    'Values': [
-                        'pending',
-                        'running',
-                        'shutting-down',
-                        'stopping',
-                        'stopped'
-                    ]
+                    "Name": "instance-state-name",
+                    "Values": [
+                        "pending",
+                        "running",
+                        "shutting-down",
+                        "stopping",
+                        "stopped",
+                    ],
                 }
             ]
         )
-        amis = [i.get("ImageId", None)
-                for r in resp.get("Reservations", [])
-                for i in r.get("Instances", [])]
+        amis = [
+            i.get("ImageId", None)
+            for r in resp.get("Reservations", [])
+            for i in r.get("Instances", [])
+        ]
 
         return amis
